@@ -28,7 +28,7 @@ function testConnect() {
         })
     });
 }
-//testConnect();
+// testConnect();
 
 //  한개 문서 insert
 //  INSERT INTO mydb.friends VALUE(...);
@@ -51,7 +51,7 @@ function testInsertOne(name) {
         console.log(reason);
     })
 }
-//testInsertOne("홍길동");
+// testInsertOne("홍길동");
 
 //  다수 문서 삽입
 //  INSERT INTO friends VALUE(...), (...), (...)
@@ -80,18 +80,17 @@ function testInsertMany(names) {
         testInsertOne(names);
     }
 }
-//testInsertMany(["고길동", "둘리", "도우너"]);
+// testInsertMany(["고길동", "둘리", "도우너"]);
 // testInsertMany("징길산");
 
-// 삭제 : 
-// DELETE FROM friends [WHERE...]
-// db.friends.delete, db.friends.deleteMany({조건객체})
-
-function testDeleteAll(){
+//  삭제: 
+//  DELETE FROM friends [WHERE ...]
+//  db.friends.delete, db.friends.deleteMany({조건 객체})
+function testDeleteAll() {
     client.connect()
     .then(client => {
-        const db = client.db("mydb")
-        db.collection("friends").deleteMany({}) // 조건 객체 
+        const db = client.db("mydb");
+        db.collection("friends").deleteMany({}) //  조건 객체
         .then(result => {
             console.log(result.deletedCount, "개 레코드 삭제");
             client.close();
@@ -100,7 +99,7 @@ function testDeleteAll(){
 }
 // testDeleteAll();
 
-function testInsertOneDoc(doc){
+function testInsertOneDoc(doc) {
     client.connect()
     .then(client => {
         const db = client.db("mydb");
@@ -111,26 +110,25 @@ function testInsertOneDoc(doc){
                 client.close();
             })
             .catch(reason => {
-                console.log(reason);
+                console.error(reason);
             })
     })
 }
 // testInsertOneDoc({name: "임꺽정", job: "도적"});
 
-
-function testInsertManyDocs(docs){
+function testInsertManyDocs(docs) {
     client.connect()
     .then(client => {
         const db = client.db("mydb");
-        if(Array.isArray(docs)){
-            //여러개의 문서
+        if (Array.isArray(docs)) {
+            //  여러 개의 문서
             db.collection('friends').insertMany(docs)
             .then(result => {
                 console.log(result.insertedCount, "개 삽입");
                 client.close();
             })
             .catch(reason => {
-                console.log(reason);
+                console.error(reason);
             })
         } else {
             //  1개 문서
@@ -138,9 +136,34 @@ function testInsertManyDocs(docs){
         }
     })
 }
-testInsertManyDocs(
-    [{name: '고길동', gender: '남성', species:'인간', age: 50 },
-    {name: '둘리', gender: '남성', species:'공룡', age: 100000000 },
-    {name: '도우너', gender: '남성', species:'외계인', age: 15 },
-    {name: '또치', gender: '여성', species:'조류', age: 15 },
-    {name: '영희', gender: '여성', species:'인간', age: 12 },]);
+// testInsertManyDocs(
+//     [{name: '고길동', gender: '남성', species: '인간', age: 50},
+//      {name: '둘리', gender: '남성', species: '공룡', age: 10000000},
+//      {name: '도우너', gender: '남성', species: '외계인', age: 15},
+//      {name: '또치', gender: '여성', species: '조류', age: 15},
+//      {name: '영희', gender: '여성', species: '인간', age: 12}]);
+
+// 함수 내보내기: 다른 모듈에서 사용할 수 있게  
+exports.testInsertOneDoc = testInsertOneDoc;
+exports.testInsertManyDocs = testInsertManyDocs;
+exports.testDeleteAll = testDeleteAll;   
+
+function testUpdateByJob(name, job) {
+    //  name이 일치하는 문서, job 필드를 업데이트
+    client.connect()
+    .then(client => {
+        const db = client.db("mydb");
+        db.collection("friends").updateMany(
+            { name: name}, /* 조건 객체 */
+            {
+                $set: { job: job }  //  $set 연산자 필수
+            }
+        ).then(result => {
+            console.log(result.modifiedCount, "개 업데이트,",
+                        result.upsertedCount, "개 업서트");
+        }).then(() => {
+            client.close();
+        })
+    })
+}
+testUpdateByJob("고길동", "직장인");
