@@ -26,6 +26,13 @@ module.exports = (app) => {
         resp.render("friend_insert_form");
     })
 
+    router.get("/friends/update", (req, resp) => {
+        resp.render("friend_update_form");
+    })
+
+
+
+
     //  새 친구 등록 액션
     router.post("/friends/save", (req, resp) => {
         //  폼 정보는 req.body
@@ -63,6 +70,31 @@ module.exports = (app) => {
         })
     });
 
+
+//todo 수정
+router.post("/friends/update", (req, resp) => {
+    //  폼 정보는 req.body
+    console.log(req.body);
+    let document = req.body;
+    document.age = parseInt(document.age);
+
+    let db = app.get("db");
+
+    db.collection("friends").updateOne(document)
+    .then(result => {
+        console.log(result);
+        resp.status(200)
+            .send("SUCCESS: 친구를 수정했습니다.");
+    })
+    .catch(reason => {
+        console.error(reason);
+        resp.status(500)    //  Internal Server Error
+            .send("ERROR: 친구를 수정하지 못했습니다.");
+    })
+})
+
+
+
     //  삭제
     router.get("/friends/delete/:id", (req, resp) => {
         console.log("삭제할 ID:", req.params.id);
@@ -80,3 +112,5 @@ module.exports = (app) => {
     })
     return router;
 }
+
+
